@@ -1,0 +1,93 @@
+version: '3.8'
+ 
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+ 
+  admin-service:
+    build: ./Admin-Service
+    ports:
+      - "4999:4999"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/admin
+      - JWT_SECRET=token_key
+      - GOOGLE_API_KEY=your-google-api-key
+      - CLOUDINARY_CLOUD_NAME=dqcdgmybh
+      - CLOUDINARY_API_KEY=241657128667589
+      - CLOUDINARY_API_SECRET=rDbWeoPmQTlpfPKlCEi_cOeUcyo
+    depends_on:
+      - mongo
+ 
+  # Authentication Service
+  auth-service:
+    build: ./Auth-Service
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./Auth-Service/.env
+    depends_on:
+      - mongo
+ 
+ 
+  # Delivery Management Service
+  delivery-service:
+    build: ./Delivery-Service
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./Delivery-Service/.env
+    
+    depends_on:
+      - mongo
+ 
+      # Order Management Service
+  order-service:
+    build: ./order-management-service
+    ports:
+      - "5003:5003"
+    env_file:
+      - ./order-management-service/.env
+    depends_on:
+      - mongo
+ 
+    
+  # Payment Service
+  payment-service:
+    build: ./Payment-Service
+    ports:
+      - "5004:5004"
+    env_file:
+      - ./Payment-Service/.env
+    depends_on:
+      - mongo
+    
+ 
+  # Restaurant Management Service
+  restaurant-service:
+    build: ./Restaurant-Service
+    ports:
+      - "5005:5005"
+    env_file:
+      - ./Restaurant-Service/.env
+    depends_on:
+      - mongo
+    
+  #customer service
+  user-service:
+    build: ./User-Service
+    ports:
+      - "5006:5006"
+    env_file:
+      - ./User-Service/.env
+    depends_on:
+      - mongo
+ 
+  # Frontend Web Application
+  frontend:
+    build: ./Client
+    ports:
+      - "80:80"
+    env_file:
+      - ./Client/.env
