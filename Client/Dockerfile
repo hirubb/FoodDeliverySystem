@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Start the microservice
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
