@@ -1,20 +1,21 @@
-# Specify the base image
-FROM node:18-alpine
+FROM --platform=linux/amd64 node:20
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
+# Set environment variable to skip optional dependencies
+ENV ROLLUP_SKIP_NODEJS_NATIVE=1
+
+RUN corepack enable
+
+# Copy the package files
 COPY package*.json ./
 
-# Install the dependencies
-RUN npm install
+# Install with better flags for cross-platform compatibility
+RUN yarn install --network-timeout 600000
 
-# Copy the rest of the application code to the container
+# Copy rest of app
 COPY . .
 
-# Expose the port that the microservice will listen on
-EXPOSE 3000
+EXPOSE 5173
 
-# Start the microservice
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "dev"]

@@ -5,11 +5,16 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
  
   admin-service:
     build: ./Admin-Service
     ports:
       - "4999:4999"
+    volumes:
+      - ./Admin-Service:/app
+      - /Admin-Service/node_modules
     environment:
       - MONGO_URI=mongodb://mongo:27017/admin
       - JWT_SECRET=token_key
@@ -25,10 +30,14 @@ services:
     build: ./Auth-Service
     ports:
       - "5001:5001"
+    volumes:
+      - ./Auth-Service:/app
+      - /Auth-Service/node_modules
     env_file:
       - ./Auth-Service/.env
     depends_on:
       - mongo
+
  
  
   # Delivery Management Service
@@ -36,6 +45,9 @@ services:
     build: ./Delivery-Service
     ports:
       - "5002:5002"
+    volumes:
+      - ./Delivery-Service:/app
+      - /Delivery-Service/node_modules
     env_file:
       - ./Delivery-Service/.env
     
@@ -47,6 +59,9 @@ services:
     build: ./order-management-service
     ports:
       - "5003:5003"
+    volumes:
+      - ./order-management-service:/app
+      - /order-management-service/node_modules
     env_file:
       - ./order-management-service/.env
     depends_on:
@@ -58,6 +73,9 @@ services:
     build: ./Payment-Service
     ports:
       - "5004:5004"
+    volumes:
+      - ./Payment-Service:/app
+      - /Payment-Service/node_modules
     env_file:
       - ./Payment-Service/.env
     depends_on:
@@ -69,6 +87,9 @@ services:
     build: ./Restaurant-Service
     ports:
       - "5005:5005"
+    volumes:
+      - ./Restaurant-Service:/app
+      - /Restaurant-Service/node_modules
     env_file:
       - ./Restaurant-Service/.env
     depends_on:
@@ -79,15 +100,28 @@ services:
     build: ./User-Service
     ports:
       - "5006:5006"
+    volumes:
+      - ./User-Service:/app
+      - /User-Service/node_modules
     env_file:
       - ./User-Service/.env
     depends_on:
       - mongo
  
-  # Frontend Web Application
-  frontend:
+  # Client Web Application
+  client:
     build: ./Client
     ports:
-      - "80:80"
+      - "5173:5173"
     env_file:
       - ./Client/.env
+    depends_on:
+      - restaurant-service
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./client:/app
+      - /client/node_modules
+
+volumes:  
+  mongo_data:
