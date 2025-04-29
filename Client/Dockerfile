@@ -1,18 +1,19 @@
-FROM node:20
+FROM node:20-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first
+# Copy only package.json and package-lock.json first
 COPY package*.json ./
 
-# Install dependencies (you said Yarn, but this uses npm)
+# Install dependencies (inside the container -> Linux build)
 RUN npm install
 
-# Then copy the rest of the app
+# Now copy the rest of your app code
 COPY . .
 
-# Expose the port your app runs on (Vite defaults to 5173)
+# Expose the dev server port
 EXPOSE 5173
 
-# Start the development server
+# Start the dev server
 CMD ["npm", "run", "dev"]

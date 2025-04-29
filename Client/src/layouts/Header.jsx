@@ -5,7 +5,7 @@ import logo from "/src/assets/logo-color.png";
 import Sidebar from "./Sidebar";
 import { UserContext } from "../context/UserContext";
 import { FaUserCircle } from "react-icons/fa";
-import { CartContext } from "../context/CartContext";
+
 
 
 
@@ -13,16 +13,17 @@ function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
+  const isCustomer = localStorage.getItem("role") === "Customer";
 
   let profileLink = "";
 
-  if(role === "Admin") {
+  if (role === "Admin") {
     profileLink = "/admin-dashboard"
   }
-  if(role === "Restaurant Owner"){
+  if (role === "Restaurant Owner") {
     profileLink = "/owner/profile"
   }
-  if(role === "Customer"){
+  if (role === "Customer") {
     profileLink = "/customer-dashboard"
   }
 
@@ -36,10 +37,6 @@ function Header() {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
-  const { getItemCount } = useContext(CartContext);
-  const cartItemCount = getItemCount();
-
 
   return (
     <>
@@ -65,12 +62,16 @@ function Header() {
             >
               Restaurants
             </Link>
-            <Link
-              to="/orders"
-              className="text-white px-4 py-2 rounded hover:bg-[#FC8A06]"
-            >
-              Track Order
-            </Link>
+            <>
+      {isCustomer && ( // Render the link only if the user is a 'Customer'
+        <Link
+          to="/orders"
+          className="text-white px-4 py-2 rounded hover:bg-[#FC8A06]"
+        >
+          Track Order
+        </Link>
+      )}
+    </>
           </div>
 
           {/* Right Section */}
@@ -78,23 +79,23 @@ function Header() {
             {/* If logged in: Show profile, else show login */}
             {token && loggedIn ? (
               <Link
-              to={profileLink}
-              className="flex flex-col items-center text-[#FC8A06] hover:text-[#E67E22]"
-            >
-              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 mb-1">
-                {userImage ? (
-                  <img
-                    src={userImage}
-                    alt="User Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <FaUserCircle className="text-orange-500 w-6 h-6" />
-                )}
-              </div>
-           
-              <span className="text-md font-semibold text-center ">{username}</span>
-            </Link>
+                to={profileLink}
+                className="flex flex-col items-center text-[#FC8A06] hover:text-[#E67E22]"
+              >
+                <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 mb-1">
+                  {userImage ? (
+                    <img
+                      src={userImage}
+                      alt="User Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FaUserCircle className="text-orange-500 w-6 h-6" />
+                  )}
+                </div>
+
+                <span className="text-md font-semibold text-center ">{username}</span>
+              </Link>
             ) : (
               <Link
                 to="/login"
@@ -103,16 +104,19 @@ function Header() {
                 Login
               </Link>
             )}
+        
+        <>
+        {isCustomer && ( 
+          <Link to="/cart" className="relative">
+          <FaShoppingCart size={24} className="text-white" />
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+            3
+          </span>
+        </Link>
 
-             {/* Cart Icon */}
-             <Link to="/cart" className="relative">
-              <FaShoppingCart size={24} className="text-white" />
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                {cartItemCount > 0 ? cartItemCount : ""}
-              </span>
-            </Link>
-
-
+        )}
+        </>
+      
             {/* Menu Icon */}
             <button
               onClick={toggleSidebar}

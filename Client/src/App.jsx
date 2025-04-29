@@ -22,7 +22,7 @@ import Profile from "./Pages/Restaurant/profile/Profile";
 import CreateMenu from "./Pages/Restaurant/profile/CreateMenu";
 import CreateMenuForm from "./components/ResturantManagement/profile/CreateMenuForm";
 import CreateMenuItems from "./components/ResturantManagement/profile/CreateMenuItems";
-import OwnerLogin from "./Pages/Restaurant/profile/OwnerLogin";
+
 import ShowMenu from "./components/ResturantManagement/profile/ShowMenu";
 import CreatePromo from "./components/ResturantManagement/profile/CreatePromo";
 import CheckoutPage from "./Pages/Payment/Checkout";
@@ -78,9 +78,8 @@ const AppContent = () => {
           <Route
             path="/owner/profile"
             element={
-              <PrivateRoute roles={["Restaurant Owner"]}>
                 <RestaurantOwnerDashboard />
-              </PrivateRoute>
+            
             }
           />
           <Route
@@ -116,14 +115,6 @@ const AppContent = () => {
             }
           />
           <Route
-            path="/owner/login"
-            element={
-              <PrivateRoute roles={["Restaurant Owner"]}>
-                <OwnerLogin />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/restaurant/menu/:restaurantId"
             element={
               <PrivateRoute roles={["Restaurant Owner"]}>
@@ -147,14 +138,14 @@ const AppContent = () => {
           <Route
             path="/admin-dashboard"
             element={
-              <PrivateRoute roles={["Admin"]}>
+             
                 <AdminDashboard />
-              </PrivateRoute>
+              
             }
           />
 
           <Route path="/customer-dashboard" element={<CustomerDashboard />} />
-          
+
           {/* <Route path="/test-payment" element={<TestPayment />} /> */}
 
           {/* ===================== Delivery Rider Routes ===================== */}
@@ -185,13 +176,13 @@ const AppContent = () => {
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/google-callback" element={<GoogleCallback />} />
 
-         
+
 
 
         </Routes>
       </main>
       {!isAuthPage && !isDliveryPersonnelSignUp && <Footer />}
-      
+
     </div>
   );
 };
@@ -200,8 +191,6 @@ const App = () => {
   return (
     <AuthProvider>
       <UserProvider>
-        {" "}
-        {/* Wrap your app in UserProvider */}
         <Router>
           <AppContent />
         </Router>
