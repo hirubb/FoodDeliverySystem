@@ -1,20 +1,18 @@
-# Specify the base image
-FROM node:18-alpine
+FROM node:20
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
+# Copy package.json and package-lock.json first
 COPY package*.json ./
 
-# Install the dependencies
+# Install dependencies (you said Yarn, but this uses npm)
 RUN npm install
 
-# Copy the rest of the application code to the container
+# Then copy the rest of the app
 COPY . .
 
-# Expose the port that the microservice will listen on
-EXPOSE 3000
+# Expose the port your app runs on (Vite defaults to 5173)
+EXPOSE 5173
 
-# Start the microservice
-CMD ["npm", "start"]
+# Start the development server
+CMD ["npm", "run", "dev"]

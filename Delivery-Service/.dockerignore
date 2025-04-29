@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+dist
+build
+.cache
+.next
+out
+*.local
+.env
+.DS_Store
+.vscode
+.idea
+*.iml
+coverage

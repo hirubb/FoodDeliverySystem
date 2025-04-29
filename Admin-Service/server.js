@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
 
 // Connect to MongoDB
 mongoose
-  .connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(DB_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ Could not connect to MongoDB:", err));
 
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at Admin service http://localhost:${PORT}`);
+  console.log(`🚀 Server running at Admin service ${PORT}`);
 });
 
 //routes import

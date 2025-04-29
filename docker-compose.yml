@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  admin-service:
+    build: ./Admin-Service
+    ports:
+      - "4999:4999"
+    volumes:
+      - ./Admin-Service:/app
+    env_file:
+      - ./Admin-Service/.env
+    depends_on:
+      - mongo
+
+  auth-service:
+    build: ./Auth-Service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./Auth-Service:/app
+    env_file:
+      - ./Auth-Service/.env
+    depends_on:
+      - mongo
+
+  delivery-service:
+    build: ./Delivery-Service
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./Delivery-Service:/app
+    env_file:
+      - ./Delivery-Service/.env
+    depends_on:
+      - mongo
+
+  order-service:
+    build: ./order-management-service
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./order-management-service:/app
+    env_file:
+      - ./order-management-service/.env
+    depends_on:
+      - mongo
+
+  payment-service:
+    build: ./Payment-Service
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./Payment-Service:/app
+    env_file:
+      - ./Payment-Service/.env
+    depends_on:
+      - mongo
+
+  restaurant-service:
+    build: ./Restaurant-Service
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./Restaurant-Service:/app
+    env_file:
+      - ./Restaurant-Service/.env
+    depends_on:
+      - mongo
+
+  user-service:
+    build: ./User-Service
+    ports:
+      - "5006:5006"
+    volumes:
+      - ./User-Service:/app
+    env_file:
+      - ./User-Service/.env
+    depends_on:
+      - mongo
+
+  client:
+    build: ./Client
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./Client/.env
+    depends_on:
+      - restaurant-service
+      - auth-service
+      - admin-service
+      - delivery-service
+      - order-service
+      - payment-service
+      - user-service
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./Client:/app
+
+volumes:
+  mongo_data:
