@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mongo:
     image: mongo:latest
@@ -5,108 +7,84 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
- 
+
   admin-service:
     build: ./Admin-Service
     ports:
       - "4999:4999"
     volumes:
       - ./Admin-Service:/app
-      - /Admin-Service/node_modules
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/admin
-      - JWT_SECRET=token_key
-      - GOOGLE_API_KEY=your-google-api-key
-      - CLOUDINARY_CLOUD_NAME=dqcdgmybh
-      - CLOUDINARY_API_KEY=241657128667589
-      - CLOUDINARY_API_SECRET=rDbWeoPmQTlpfPKlCEi_cOeUcyo
+    env_file:
+      - ./Admin-Service/.env
     depends_on:
       - mongo
- 
-  # Authentication Service
+
   auth-service:
     build: ./Auth-Service
     ports:
       - "5001:5001"
     volumes:
       - ./Auth-Service:/app
-      - /Auth-Service/node_modules
     env_file:
       - ./Auth-Service/.env
     depends_on:
       - mongo
 
- 
- 
-  # Delivery Management Service
   delivery-service:
     build: ./Delivery-Service
     ports:
       - "5002:5002"
     volumes:
       - ./Delivery-Service:/app
-      - /Delivery-Service/node_modules
     env_file:
       - ./Delivery-Service/.env
-    
     depends_on:
       - mongo
- 
-      # Order Management Service
+
   order-service:
     build: ./order-management-service
     ports:
       - "5003:5003"
     volumes:
       - ./order-management-service:/app
-      - /order-management-service/node_modules
     env_file:
       - ./order-management-service/.env
     depends_on:
       - mongo
- 
-    
-  # Payment Service
+
   payment-service:
     build: ./Payment-Service
     ports:
       - "5004:5004"
     volumes:
       - ./Payment-Service:/app
-      - /Payment-Service/node_modules
     env_file:
       - ./Payment-Service/.env
     depends_on:
       - mongo
-    
- 
-  # Restaurant Management Service
+
   restaurant-service:
     build: ./Restaurant-Service
     ports:
       - "5005:5005"
     volumes:
       - ./Restaurant-Service:/app
-      - /Restaurant-Service/node_modules
     env_file:
       - ./Restaurant-Service/.env
     depends_on:
       - mongo
-    
-  #customer service
+
   user-service:
     build: ./User-Service
     ports:
       - "5006:5006"
     volumes:
       - ./User-Service:/app
-      - /User-Service/node_modules
     env_file:
       - ./User-Service/.env
     depends_on:
       - mongo
- 
-  # Client Web Application
+
   client:
     build: ./Client
     ports:
@@ -115,11 +93,16 @@ services:
       - ./Client/.env
     depends_on:
       - restaurant-service
+      - auth-service
+      - admin-service
+      - delivery-service
+      - order-service
+      - payment-service
+      - user-service
     stdin_open: true
     tty: true
     volumes:
-      - ./client:/app
-      - /app/node_modules
+      - ./Client:/app
 
-volumes:  
+volumes:
   mongo_data:

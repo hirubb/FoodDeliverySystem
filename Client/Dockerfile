@@ -2,18 +2,17 @@ FROM node:20
 
 WORKDIR /app
 
-
-RUN corepack enable
-
-# Copy the package files
+# Copy package.json and package-lock.json first
 COPY package*.json ./
 
-# Install with Yarn (more reliable with native deps)
-RUN yarn install
+# Install dependencies (you said Yarn, but this uses npm)
+RUN npm install
 
-# Copy rest of app
+# Then copy the rest of the app
 COPY . .
 
+# Expose the port your app runs on (Vite defaults to 5173)
 EXPOSE 5173
 
-CMD ["yarn", "dev"]
+# Start the development server
+CMD ["npm", "run", "dev"]
