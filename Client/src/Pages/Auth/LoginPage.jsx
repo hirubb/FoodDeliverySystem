@@ -5,11 +5,11 @@ import authService from '../../services/AuthService';
 import bannerImage1 from '../../assets/Login&Register/logo5.png';
 import bannerImage2 from '../../assets/Login&Register/logo3.png';
 import bannerImage3 from '../../assets/Login&Register/logo6.png';
-import googleIcon from '../../assets/Login&Register/google.png'; 
+import googleIcon from '../../assets/Login&Register/google.png'; // Add this Google icon to your assets
 
 export default function LoginPage() {
-    const [formData, setFormData] = useState({ 
-        email: "", 
+    const [formData, setFormData] = useState({
+        email: "",
         password: ""
     });
     const [error, setError] = useState("");
@@ -31,14 +31,23 @@ export default function LoginPage() {
         // Handle Google OAuth callback if code is present in URL
         const params = new URLSearchParams(location.search);
         const code = params.get('code');
-        
+
         if (code) {
             setGoogleLoading(true);
             authService.handleGoogleCallback(code)
                 .then(response => {
                     console.log("Google auth response:", response.data);
-                    const userRole = getUserRoleFromResponse(response.data);
-                    routeBasedOnRole(userRole);
+                    if (response && response.data) {
+                        // Store authentication data including token
+                        if (response.data.token) {
+                            authService.setAuthData(response.data);
+                        }
+                        const userRole = getUserRoleFromResponse(response.data);
+                        console.log("Determined role from Google auth:", userRole);
+                        routeBasedOnRole(userRole);
+                    } else {
+                        throw new Error('Invalid response from server');
+                    }
                 })
                 .catch(err => {
                     console.error("Google auth error:", err);
@@ -46,12 +55,12 @@ export default function LoginPage() {
                 })
                 .finally(() => setGoogleLoading(false));
         }
-        
+
         const rememberedEmail = localStorage.getItem('rememberedEmail');
-        
+
         if (rememberedEmail) {
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 email: rememberedEmail
             }));
             setRememberMe(true);
@@ -116,25 +125,66 @@ export default function LoginPage() {
                 localStorage.removeItem('rememberedEmail');
             }
 
-            // Get user role from response
-            const userRole = getUserRoleFromResponse(response.data);
-            
+            // Get user role from response - check all possible locations
+            // IMPORTANT: The role could be in different places depending on user type
+            let userRole = null;
+
+            // Check direct role property
+            if (response.data.role) {
+                userRole = response.data.role;
+            }
+            // Check user object if it exists
+            else if (response.data.user && response.data.user.role) {
+                userRole = response.data.user.role;
+            }
+            // Check customer object if it exists (specific to customer login)
+            else if (response.data.customer && response.data.customer.role) {
+                userRole = response.data.customer.role;
+            }
+            // Check restaurant owner object if it exists
+            else if (response.data.restaurantOwner && response.data.restaurantOwner.role) {
+                userRole = response.data.restaurantOwner.role;
+            }
+            // Check admin object if it exists
+            else if (response.data.admin && response.data.admin.role) {
+                userRole = response.data.admin.role;
+            }
+
+            // Normalize role format if needed
+            userRole = normalizeRoleName(userRole);
+
+            console.log("Detected user role:", userRole);
+
             // Route based on role
-            routeBasedOnRole(userRole);
+            if (userRole === 'Admin') {
+                navigate('/admin-dashboard');
+            } else if (userRole === 'RestaurantOwner') {
+                navigate('/owner/profile');
+            } else if (userRole === 'Customer') {
+                navigate('/customer-dashboard');
+            } else if (userRole === 'DeliveryPerson') {
+                navigate('/deliveryPersonnel/DriverDashboard');
+
+
+            } else {
+                // Default fallback - should rarely happen if the backend is properly configured
+                console.warn("Unknown or missing role:", userRole);
+                setError('Login successful but user role is unknown. Please contact support.');
+            }
         } catch (err) {
             console.error("Login error:", err);
-            
+
             // Extract error message from the response with fallback messages
-            const errorMessage = err?.response?.data?.message || 
-                                err?.response?.data?.error || 
-                                err?.message || 
-                                'Login failed. Please check your credentials and try again.';
+            const errorMessage = err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                err?.message ||
+                'Login failed. Please check your credentials and try again.';
             setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
-    
+
     const handleGoogleLogin = () => {
         setGoogleLoading(true);
         try {
@@ -146,39 +196,77 @@ export default function LoginPage() {
         }
     };
 
-    // Helper function to extract role from response
+    // Helper function to extract role from response - Improved version
     const getUserRoleFromResponse = (data) => {
+        if (!data) return null;
+
+        // Direct debug log of the full response structure
+        console.log("Full auth data structure:", JSON.stringify(data));
+
         let userRole = null;
-        
+
         // Check direct role property
         if (data.role) {
             userRole = data.role;
-        } 
+        }
         // Check user object if it exists
         else if (data.user && data.user.role) {
             userRole = data.user.role;
-        } 
+        }
         // Check customer object if it exists (specific to customer login)
         else if (data.customer && data.customer.role) {
             userRole = data.customer.role;
+            console.log("Found role in data.customer.role:", userRole);
         }
         // Check restaurant owner object if it exists
         else if (data.restaurantOwner && data.restaurantOwner.role) {
             userRole = data.restaurantOwner.role;
+            console.log("Found role in data.restaurantOwner.role:", userRole);
+        }
+        // Check if the direct userData or user object contains the role
+        else if (data.userData && data.userData.role) {
+            userRole = data.userData.role;
+            console.log("Found role in data.userData.role:", userRole);
         }
         // Check admin object if it exists
         else if (data.admin && data.admin.role) {
             userRole = data.admin.role;
+            console.log("Found role in data.admin.role:", userRole);
+        }
+        // If role is still not found, attempt to parse the user type from available data
+        else {
+            // Check if restaurantOwner object exists at all (even without role property)
+            if (data.restaurantOwner) {
+                userRole = 'Restaurant Owner';
+                console.log("Inferred role from restaurantOwner object presence");
+            }
+            // Check if customer object exists at all
+            else if (data.customer) {
+                userRole = 'Customer';
+                console.log("Inferred role from customer object presence");
+            }
+            // Check if admin object exists at all
+            else if (data.admin) {
+                userRole = 'Admin';
+                console.log("Inferred role from admin object presence");
+            }
+            // Check if user object exists and has a type property
+            else if (data.user && data.user.type) {
+                userRole = data.user.type;
+                console.log("Found role in data.user.type:", userRole);
+            }
         }
 
         // Normalize role format if needed
-        return normalizeRoleName(userRole);
+        const normalizedRole = normalizeRoleName(userRole);
+        console.log("Final normalized role:", normalizedRole);
+        return normalizedRole;
     };
 
-    // Helper function to route based on role
+    // Helper function to route based on role - Improved version with additional safeguards
     const routeBasedOnRole = (userRole) => {
         console.log("Routing based on role:", userRole);
-        
+
         if (userRole === 'Admin') {
             navigate('/admin-dashboard');
         } else if (userRole === 'RestaurantOwner') {
@@ -192,30 +280,35 @@ export default function LoginPage() {
         }
     };
 
-    // Helper function to normalize role names
+    // Helper function to normalize role names - Improved version
     const normalizeRoleName = (role) => {
         if (!role) return null;
-        
+
         // Convert to string in case it's not
         const roleStr = String(role);
-        
+
         // Handle different formats of the same role
-        if (roleStr.toLowerCase() === 'restaurantowner' || 
+        if (roleStr.toLowerCase() === 'restaurantowner' ||
             roleStr.toLowerCase() === 'restaurant owner' ||
             roleStr.toLowerCase() === 'restaurant_owner') {
             return 'RestaurantOwner';
         }
-        
-        if (roleStr.toLowerCase() === 'admin' || 
+
+        if (roleStr.toLowerCase() === 'admin' ||
             roleStr.toLowerCase() === 'administrator') {
             return 'Admin';
         }
-        
-        if (roleStr.toLowerCase() === 'customer' || 
+
+        if (roleStr.toLowerCase() === 'customer' ||
             roleStr.toLowerCase() === 'user') {
             return 'Customer';
         }
-        
+
+        if (roleStr.toLowerCase() === 'delivery person') {
+            return 'DeliveryPerson';
+        }
+
+
         // If no mapping found, return the original
         return roleStr;
     };
