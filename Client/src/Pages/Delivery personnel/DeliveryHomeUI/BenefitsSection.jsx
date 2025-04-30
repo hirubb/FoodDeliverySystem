@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaMoneyBillWave, FaClock, FaCarSide, FaLocationArrow, FaTachometerAlt, FaShieldAlt } from 'react-icons/fa';
-import benefitImage from '../../../assets/DeliveryPerson/DeliveryRider.jpg';
+import benefitImage from '../../../assets/DeliveryPerson/BenefitSection.jpg';
 
 const BenefitsSection = () => {
     const benefits = [

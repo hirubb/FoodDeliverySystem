@@ -13,7 +13,6 @@ function Header() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
-  const isCustomer = localStorage.getItem("role") === "Customer";
 
   let profileLink = "";
 
@@ -62,16 +61,24 @@ function Header() {
             >
               Restaurants
             </Link>
-            <>
-      {isCustomer && ( // Render the link only if the user is a 'Customer'
-        <Link
-          to="/orders"
-          className="text-white px-4 py-2 rounded hover:bg-[#FC8A06]"
-        >
-          Track Order
-        </Link>
-      )}
-    </>
+            <Link
+              to="/orders"
+              className="text-white px-4 py-2 rounded hover:bg-[#FC8A06]"
+            >
+              Track Order
+            </Link>
+            <Link
+              to="/deliveryPersonnel/HomePage"
+              className="text-white px-4 py-2 rounded hover:bg-[#FC8A06]"
+            >
+              Drive
+            </Link>
+
+
+
+
+
+
           </div>
 
           {/* Right Section */}
@@ -104,19 +111,16 @@ function Header() {
                 Login
               </Link>
             )}
-        
-        <>
-        {isCustomer && ( 
-          <Link to="/cart" className="relative">
-          <FaShoppingCart size={24} className="text-white" />
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-            3
-          </span>
-        </Link>
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative">
+              <FaShoppingCart size={24} className="text-white" />
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                3
+              </span>
+            </Link>
 
-        )}
-        </>
-      
+
+
             {/* Menu Icon */}
             <button
               onClick={toggleSidebar}

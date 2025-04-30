@@ -60,6 +60,17 @@ class CustomerService {
   getShoppingCart() {
     return CustomerHTTP.get("/cart");
   }
+
+
+  // Get Customer by ID for the Delivery Person - Gayashan
+
+  GetCustomerById(id) {
+    return CustomerHTTP.get(`/customers/${id}`);
+  }
+
+
+
+
 }
 
 export default new CustomerService();

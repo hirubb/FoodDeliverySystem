@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaMoneyBillWave, FaStar, FaShieldAlt } from 'react-icons/fa';
 import riderHeroImage from '../../../assets/DeliveryPerson/DeliveryRider.jpg';
+import { Link } from 'react-router-dom';
+
 
 const HeroSection = () => {
     return (
@@ -40,7 +42,13 @@ const HeroSection = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.98 }}
                             >
-                                Apply Now
+
+
+                                <Link to="/deliveryPersonnel-SignUp">
+                                    Apply Now
+
+                                </Link>
+
                             </motion.button>
 
                             <motion.button
